@@ -1,0 +1,17 @@
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> } 
+ */
+const faker = require('@faker-js/faker').faker;
+exports.seed = async function(knex) {
+  // Deletes ALL existing entries
+  await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
+  await knex('users').truncate();
+  await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
+  for(let i=0;i<50;i++){
+      const name = faker.person.fullName();
+      const phone = faker.phone.number({ style: 'international' });
+      const email = faker.internet.email();
+      await knex.raw(`INSERT INTO users (name, email, phone) VALUES (?,?,?)`,[name,email,phone]);
+  }
+};
