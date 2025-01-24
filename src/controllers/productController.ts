@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
-import db from '../db/database';
+import Product from "../models/productModel";
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const query = 'SELECT * FROM products';
-    const [rows] = await db.query(query);
-    res.status(200).json(rows);
+    const products = await Product.getProducts();
+    res.status(200).json(products);
   } catch (error) {
     console.error(error);
     res.status(500).send('Error fetching products');
@@ -15,9 +14,8 @@ export const getProducts = async (req: Request, res: Response) => {
 export const getProductById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const query = `SELECT * FROM products WHERE id = ?`;
-    const [rows] = await db.query(query, [id]);
-    res.status(200).json(rows);
+    const product = await Product.getProductById(id);
+    res.status(200).json(product);
   } catch (error) {
     console.error(error);
     res.status(500).send('Error fetching product');
