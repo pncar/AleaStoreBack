@@ -7,7 +7,8 @@ module.exports = {
     database: 'blankproject'  // Replace with your database name
   },
   migrations: {
-    tableName: 'knex_migrations'  // The table for tracking migrations
+    tableName: 'knex_migrations', // The table for tracking migrations,
+	timestamp: false
   },
   seeds: {
     directory: './seeds'  // The folder where seed files will be stored

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import db from '../db/database';
 import Category from "../models/categoryModel";
 
 export const getCategories = async (req: Request, res: Response) => {

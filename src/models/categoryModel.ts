@@ -1,6 +1,4 @@
 import db from '../db/database';
-import { faker } from '@faker-js/faker';
-import { Request, Response } from 'express';
 
 class Category {
     static async getCategories(){

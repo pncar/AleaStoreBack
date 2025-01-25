@@ -19,6 +19,8 @@ const categories = [
     {id: 12, name: "Android", description: "", parent: 10}
 ];
 
+const productsLength = 50;
+
 exports.seed = async function(knex) {
 
   // Deletes ALL existing entries
@@ -45,13 +47,23 @@ exports.seed = async function(knex) {
     await knex.raw(`INSERT INTO categories (id, name, description ${category.parent ? ", parent" : ""}) VALUES (?,?,?${category.parent ? ",?" : ""})`,args);
   }
 
+  await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
   await knex('products').truncate();
-  for(let i=0;i<50;i++){
+  await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
+  for(let i=0;i<productsLength;i++){
       const name = faker.lorem.word();
       const identifier = faker.string.alpha(8);
       const description = faker.lorem.paragraph(2);
-      const category = faker.number.int({min: 1, max:8});
+      //const category = faker.number.int({min: 1, max:8});
       const user = faker.number.int({min: 1, max:50});
-      await knex.raw(`INSERT INTO products (name, identifier, description, category_id, user_id) VALUES (?,?,?,?,?)`,[name,identifier,description,category,user]);
+      await knex.raw(`INSERT INTO products (name, identifier, description, user_id) VALUES (?,?,?,?)`,[name,identifier,description,user]);
+  }
+
+  await knex('products_categories').truncate();
+  const [products] = await knex.raw(`SELECT * FROM products`);
+  for(let i=0;i<products.length;i++){
+    const productId = products[i].id;
+    const categoryId = 2;
+    await knex.raw(`INSERT INTO products_categories (product_id, category_id) VALUES (?,?)`,[productId,categoryId]);
   }
 };

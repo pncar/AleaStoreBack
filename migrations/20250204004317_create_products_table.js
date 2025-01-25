@@ -9,7 +9,7 @@ exports.up = function(knex) {
     table.string('identifier', 8).notNullable().unique();
     table.text('description');
     table.timestamps(true, true);  
-    table.integer('category_id').unsigned().references('id').inTable('categories').onDelete('SET NULL');
+    //table.integer('category_id').unsigned().references('id').inTable('categories').onDelete('SET NULL');
     table.integer('user_id').unsigned().references('id').inTable('users').onDelete('SET NULL');
   });
 };
