@@ -9,6 +9,7 @@ exports.up = function(knex) {
         table.string('description');
         table.integer('parent');
         table.timestamps(true, true); 
+        table.integer('tier');
     });
 };
 

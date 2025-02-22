@@ -11,25 +11,19 @@ class Category {
         const [rows] = await db.query(query,id);
         return rows;
     }
+    static async getCategoriesByTier(tier:string){
+        const query = `SELECT * FROM categories WHERE tier = ?`;
+        const [rows] = await db.query(query,tier);
+        return rows;
+    }
+    static async setParentCategory(parentId:string,id:string){
+        const query = `INSERT INTO categories (parent) VALUES (?) WHERE id = ?`;
+        try{
+            await db.query(query,[parentId,id]);
+        }catch(error){
+            throw Error(`Error setting parent ${parentId} to category ${id}`);
+        }
+    }
 }
 
 export default Category;
-
-/*
-OLD WAY TO GET DESCEDNANTS
-
-  const { id } = req.params;
-  try{
-    const query = `SELECT * FROM categories WHERE id = ?`;
-    const [rows] = await db.query(query,id);
-
-    const getTree = async () => {
-      const [rows] = await db.query(`SELECT * FROM categories WHERE parent = ${id}`);
-      return rows;
-    }
-
-    const sneed = await getTree();
-
-    //@ts-ignore
-    res.status(200).json([...rows,...sneed]);
-*/

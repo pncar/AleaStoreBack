@@ -3,25 +3,19 @@
  * @returns { Promise<void> } 
  */
 const faker = require('@faker-js/faker').faker;
+const fs = require("fs");
+const { parse, stringify } = require('yaml');
+const _ = require('lodash');
+const bcrypt = require("bcryptjs");
 
-const categories = [
-    {id: 1, name: "HDD", description : "", parent: 9},
-    {id: 2, name: "SSD", description: "", parent: 9},
-    {id: 3, name: "GFX", description: "", parent: 9},
-    {id: 4, name: "RAM", description: "", parent: 9},
-    {id: 5, name: "CPU", description: "", parent: 9},
-    {id: 6, name: "Monitor", description: "", parent: 9},
-    {id: 7, name: "Mouse", description: "", parent: 9},
-    {id: 8, name: "Keyboard", description: "", parent: 9},
-    {id: 9, name: "Technology", description: ""},
-    {id: 10, name: "Phones & Tablets", description: ""},
-    {id: 11, name: "Phones", description: "", parent: 9},
-    {id: 12, name: "Android", description: "", parent: 10}
-];
+const categories = JSON.parse(fs.readFileSync('seeds/categories.json', 'utf8')).categories;
+const baseProducts = JSON.parse(fs.readFileSync('seeds/baseproducts.json', 'utf8')).categories;
 
 const productsLength = 50;
 
 exports.seed = async function(knex) {
+
+// Seed Users
 
   // Deletes ALL existing entries
   await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
@@ -30,9 +24,14 @@ exports.seed = async function(knex) {
   for(let i=0;i<50;i++){
       const name = faker.person.fullName();
       const phone = faker.phone.number({ style: 'international' });
-      const email = faker.internet.email();
-      await knex.raw(`INSERT INTO users (name, email, phone) VALUES (?,?,?)`,[name,email,phone]);
+      const password = bcrypt.hashSync("password", 1);
+      const email = i > 0 ? faker.internet.email() : "user@gmail.com";
+      const handle = name.toLowerCase().replace(" ","_").slice(0,16);
+      const role = i <= 0 ? "admin" : (i < 5 ? "user" : "user"); // Used to be "seller" option
+      await knex.raw(`INSERT INTO users (name, email, password, phone, handle, role) VALUES (?,?,?,?,?,?)`,[name,email,password,phone,handle,role]);
   }
+
+// Seed Categories
 
   await knex('categories').del();
   await knex.raw('ALTER TABLE categories AUTO_INCREMENT = 0');
@@ -40,30 +39,59 @@ exports.seed = async function(knex) {
     const args = [];
     args[0] = category.id;
     args[1] = category.name;
-    args[2] = category.description;
-    if(category.parent){
-      args[3] = category.parent;
-    }
-    await knex.raw(`INSERT INTO categories (id, name, description ${category.parent ? ", parent" : ""}) VALUES (?,?,?${category.parent ? ",?" : ""})`,args);
+    args[2] = category.description || "";
+    args[3] = category.parent || 0;
+    args[4] = category.tier;
+    await knex.raw(`INSERT INTO categories (id, name, description, parent, tier) VALUES (?,?,?,?,?)`,args);
   }
+
+// Seed Products
 
   await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
   await knex('products').truncate();
   await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
   for(let i=0;i<productsLength;i++){
-      const name = faker.lorem.word();
-      const identifier = faker.string.alpha(8);
-      const description = faker.lorem.paragraph(2);
-      //const category = faker.number.int({min: 1, max:8});
-      const user = faker.number.int({min: 1, max:50});
-      await knex.raw(`INSERT INTO products (name, identifier, description, user_id) VALUES (?,?,?,?)`,[name,identifier,description,user]);
+    const baseProduct = baseProducts[Math.floor(Math.random() * baseProducts.length)];
+    const name = `${baseProduct.productName} ${_.capitalize(faker.lorem.word())}`;
+    const identifier = faker.string.alpha(8);
+    const description = faker.lorem.paragraph(2);
+    const base_id = baseProduct.id; // FLAG not sure about this
+    //const category = faker.number.int({min: 1, max:8});
+    //const user = faker.number.int({min: 2, max:5});
+    let price = faker.number.int({min: baseProduct.priceRange[0], max: baseProduct.priceRange[1]});
+    if(price > 9){
+      price = Math.round(price/10)*10;
+    }
+    await knex.raw(`INSERT INTO products (name, identifier, description, price, base_id) VALUES (?,?,?,?,?)`,[name,identifier,description,price,base_id]);
   }
+
+// Attach Products to Categories 
 
   await knex('products_categories').truncate();
   const [products] = await knex.raw(`SELECT * FROM products`);
   for(let i=0;i<products.length;i++){
     const productId = products[i].id;
-    const categoryId = 2;
+    //const categoryId = 2;
+    //console.log(baseProducts.find((product)=>{return product.id === products[i].base_id}));
+    const categoryId = baseProducts.find((product)=>{return product.id === products[i].base_id}).id;
     await knex.raw(`INSERT INTO products_categories (product_id, category_id) VALUES (?,?)`,[productId,categoryId]);
   }
+
+
+// Create Views
+
+  await knex.raw('DROP VIEW IF EXISTS ProductView');
+  //await knex.raw(`CREATE VIEW ProductView AS SELECT p.id, p.name, p.description, p.price, p.user_id, u.handle AS user, u.name AS user_name FROM products p JOIN users u ON p.user_id = u.id`);
+  //await knex.raw(`CREATE VIEW ProductView AS SELECT id, name, description, price FROM products`);
+  await knex.raw(`
+  CREATE VIEW ProductView AS SELECT products.id, products.name, products.description, products.price, products.image, products.updated_at AS date, categories.name AS category, categories.id AS category_id FROM products 
+  JOIN products_categories ON products.id = products_categories.product_id JOIN categories ON products_categories.category_id = categories.id`);
+
+  await knex.raw('DROP VIEW IF EXISTS OrderItemsView');
+  await knex.raw('CREATE VIEW OrderItemsView AS SELECT oi.*, oi.quantity * p.price AS total, p.price FROM orderitems oi JOIN products p ON oi.product_id = p.id');
+
+  await knex.raw('DROP VIEW IF EXISTS OrdersView');
+  await knex.raw('CREATE VIEW OrdersView AS SELECT o.*, SUM(oi.quantity * p.price) AS total FROM orders o JOIN orderitems oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id GROUP BY o.id');
+
+
 };

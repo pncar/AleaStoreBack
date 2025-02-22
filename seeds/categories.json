@@ -1,0 +1,208 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Cellphones & Accessories",
+      "tier": 1,
+      "parent": null
+    },
+    {
+      "id": 2,
+      "name": "Cellphones",
+      "tier": 2,
+      "parent": 1
+    },
+    {
+      "id": 3,
+      "name": "iPhones",
+      "tier": 3,
+      "parent": 2
+    },
+    {
+      "id": 4,
+      "name": "Android",
+      "tier": 3,
+      "parent": 2
+    },
+    {
+      "id": 5,
+      "name": "Samsung",
+      "tier": 4,
+      "parent": 4
+    },
+    {
+      "id": 6,
+      "name": "Motorola",
+      "tier": 4,
+      "parent": 4
+    },
+    {
+      "id": 7,
+      "name": "Xiaomi",
+      "tier": 4,
+      "parent": 4
+    },
+    {
+      "id": 8,
+      "name": "Huaweii",
+      "tier": 4,
+      "parent": 4
+    },
+    {
+      "id": 9,
+      "name": "Other",
+      "tier": 4,
+      "parent": 4
+    },
+    {
+      "id": 10,
+      "name": "Google Pixel",
+      "tier": 3,
+      "parent": 2
+    },
+    {
+      "id": 11,
+      "name": "Cases",
+      "tier": 2,
+      "parent": 1
+    },
+    {
+      "id": 12,
+      "name": "iPhone Cases",
+      "tier": 3,
+      "parent": 11
+    },
+    {
+      "id": 13,
+      "name": "Samsung Cases",
+      "tier": 3,
+      "parent": 11
+    },
+    {
+      "id": 14,
+      "name": "Google Pixel Cases",
+      "tier": 3,
+      "parent": 11
+    },
+    {
+      "id": 15,
+      "name": "Other Cases",
+      "tier": 3,
+      "parent": 11
+    },
+    {
+      "id": 16,
+      "name": "Connected Devices",
+      "tier": 2,
+      "parent": 1
+    },
+    {
+      "id": 17,
+      "name": "Earbuds & Headphones",
+      "tier": 3,
+      "parent": 16
+    },
+    {
+      "id": 18,
+      "name": "Earbuds",
+      "tier": 4,
+      "parent": 17
+    },
+    {
+      "id": 19,
+      "name": "Headphones",
+      "tier": 4,
+      "parent": 17
+    },
+    {
+      "id": 20,
+      "name": "Smart Watches & Wearable",
+      "tier": 2,
+      "parent": 1
+    },
+    {
+      "id": 21,
+      "name": "Smart Watches",
+      "tier": 3,
+      "parent": 20
+    },
+    {
+      "id": 22,
+      "name": "Wearable",
+      "tier": 3,
+      "parent": 20
+    },
+    {
+      "id": 23,
+      "name": "Smart Rings",
+      "tier": 4,
+      "parent": 22
+    },
+    {
+      "id": 24,
+      "name": "Smart Glasses",
+      "tier": 4,
+      "parent": 22
+    },
+    {
+      "id": 25,
+      "name": "Accessories",
+      "tier": 2,
+      "parent": 1
+    },
+    {
+      "id": 26,
+      "name": "Chargers",
+      "tier": 3,
+      "parent": 25
+    },
+    {
+      "id": 27,
+      "name": "Car Accessories",
+      "tier": 3,
+      "parent": 25
+    },
+    {
+      "id": 28,
+      "name": "Car Phone Holders",
+      "tier": 4,
+      "parent": 27
+    },
+    {
+      "id": 29,
+      "name": "Car Phone Chargers",
+      "tier": 4,
+      "parent": 27
+    },
+    {
+      "id": 30,
+      "name": "Screen Protectors",
+      "tier": 3,
+      "parent": 25
+    },
+	{
+	"id": 31,
+	"name": "Glass",
+	"tier": 4,
+	"parent": 30
+	},
+	{
+	"id": 32,
+	"name": "Gel",
+	"tier": 4,
+	"parent": 30
+	},
+	{
+	"id": 33,
+	"name": "Signal Boosters",
+	"tier": 3,
+	"parent": 25
+	},
+	{
+	"id": 34,
+	"name": "Phone Grips",
+	"tier": 3,
+	"parent": 25
+	}
+	]
+}

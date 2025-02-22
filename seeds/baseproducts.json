@@ -1,0 +1,173 @@
+{
+  "categories": [
+    {
+      "id": 3,
+      "name": "iPhones",
+      "tier": 3,
+      "parent": 2,
+	  "priceRange": [800,1200],
+	  "productName": "iPhone"
+    },
+    {
+      "id": 5,
+      "name": "Samsung",
+      "tier": 4,
+      "parent": 4,
+	  "priceRange": [100,1200],
+	  "productName": "Samsung"
+    },
+    {
+      "id": 6,
+      "name": "Motorola",
+      "tier": 4,
+      "parent": 4,
+	  "priceRange": [100,1000],
+	  "productName": "Motorola"
+    },
+    {
+      "id": 7,
+      "name": "Xiaomi",
+      "tier": 4,
+      "parent": 4,
+	  "priceRange": [100,900],
+	  "productName": "Xiaomi"
+    },
+    {
+      "id": 8,
+      "name": "Huaweii",
+      "tier": 4,
+      "parent": 4,
+	  "priceRange": [100,1000],
+	  "productName": "Huwaei"
+    },
+    {
+      "id": 9,
+      "name": "Other",
+      "tier": 4,
+      "parent": 4,
+	  "priceRange": [80,1200],
+	  "productName": "Phone"
+    },
+    {
+      "id": 10,
+      "name": "Google Pixel",
+      "tier": 3,
+      "parent": 2,
+	  "priceRange": [800,1100],
+	  "productName": "Google Pixel"
+    },
+    {
+      "id": 12,
+      "name": "iPhone Cases",
+      "tier": 3,
+      "parent": 11,
+	  "priceRange": [20,60],
+	  "productName": "Case"
+    },
+    {
+      "id": 13,
+      "name": "Samsung Cases",
+      "tier": 3,
+      "parent": 11,
+	  "priceRange": [5,40],
+	  "productName": "Case"
+    },
+    {
+      "id": 14,
+      "name": "Google Pixel Cases",
+      "tier": 3,
+      "parent": 11,
+	  "priceRange": [20,40],
+	  "productName": "Case"
+    },
+    {
+      "id": 15,
+      "name": "Other Cases",
+      "tier": 3,
+      "parent": 11,
+	  "priceRange": [5,30],
+	  "productName": "Case"
+    },
+    {
+      "id": 18,
+      "name": "Earbuds",
+      "tier": 4,
+      "parent": 17,
+	  "priceRange": [20,800],
+	  "productName": "Earbuds"
+    },
+    {
+      "id": 19,
+      "name": "Headphones",
+      "tier": 4,
+      "parent": 17,
+	  "priceRange": [30,900],
+	  "productName": "Headphones"
+    },
+    {
+      "id": 23,
+      "name": "Smart Rings",
+      "tier": 4,
+      "parent": 22,
+	  "priceRange": [200,1200],
+	  "productName": "Smart Ring"
+    },
+    {
+      "id": 24,
+      "name": "Smart Glasses",
+      "tier": 4,
+      "parent": 22,
+	  "priceRange": [500,800],
+	  "productName": "Smart Glasses"
+    },
+    {
+      "id": 28,
+      "name": "Car Phone Holders",
+      "tier": 4,
+      "parent": 27,
+	  "priceRange": [50,200],
+	  "productName": "Car Phone Holder"
+    },
+    {
+      "id": 29,
+      "name": "Car Phone Chargers",
+      "tier": 4,
+      "parent": 27,
+	  "priceRange": [50,100],
+	  "productName": "Car Phone Charger"
+    },
+    {
+      "id": 31,
+      "name": "Glass",
+      "tier": 4,
+      "parent": 30,
+	  "priceRange": [5,20],
+	  "productName": "Tempered Glass Protector"
+    },
+    {
+      "id": 32,
+      "name": "Gel",
+      "tier": 4,
+      "parent": 30,
+	  "priceRange": [5,20]
+	  ,
+	  "productName": "Hydrogel Protector"
+    },
+    {
+      "id": 33,
+      "name": "Signal Boosters",
+      "tier": 3,
+      "parent": 25,
+	  "priceRange": [40,300],
+	  "productName": "Signal Booster"
+    },
+    {
+      "id": 34,
+      "name": "Phone Grips",
+      "tier": 3,
+      "parent": 25,
+	  "priceRange": [10,20],
+	  "productName": "Phone Grip"
+    }
+  ]
+}

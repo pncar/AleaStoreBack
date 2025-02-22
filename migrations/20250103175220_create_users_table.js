@@ -6,8 +6,11 @@ exports.up = function(knex) {
   return knex.schema.createTable('users', function(table) {
     table.increments('id').primary();  // Auto-incrementing primary key
     table.string('name').notNullable();  // Non-nullable 'name' column
+    table.string('password').notNullable(); //
     table.string('email').notNullable().unique();  // Non-nullable 'email' column with a unique constraint
     table.string('phone').notNullable();
+    table.string('handle',16).notNullable().unique();
+    table.enu('role',['admin','user']).notNullable().defaultTo("user");
     table.timestamps(true, true);  // Created_at and updated_at timestamps
   });
 };

@@ -9,8 +9,11 @@ exports.up = function(knex) {
     table.string('identifier', 8).notNullable().unique();
     table.text('description');
     table.timestamps(true, true);  
+    table.string('image',255).defaultTo(null);
+    table.integer('base_id').defaultTo(0).notNullable(); // This is only used on migrating/seeding
     //table.integer('category_id').unsigned().references('id').inTable('categories').onDelete('SET NULL');
-    table.integer('user_id').unsigned().references('id').inTable('users').onDelete('SET NULL');
+    //table.integer('user_id').unsigned().references('id').inTable('users').onDelete('SET NULL');
+    table.integer('price').notNullable();
   });
 };
 

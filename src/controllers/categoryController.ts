@@ -11,6 +11,17 @@ export const getCategories = async (req: Request, res: Response) => {
     }
 };
 
+export const getCategoriesByTier = async (req: Request, res: Response) => {
+  const { tier } = req.params;
+    try{
+      const categories = await Category.getCategoriesByTier(tier);
+      res.status(200).json(categories);
+    }catch (error){
+      console.error(error);
+      res.status(500).send(`Error fetching categories of tier ${tier}`);
+    }
+}
+
 export const getCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   try{
@@ -23,3 +34,4 @@ export const getCategory = async (req: Request, res: Response) => {
     res.status(500).send('Error fetching category');
   }
 }
+

@@ -1,10 +1,16 @@
 import db from '../db/database';
 import { faker } from '@faker-js/faker';
 import { Request, Response } from 'express';
+import bcrypt from "bcryptjs";
 
 class User {
     static async getUsers() {
-        const query = 'SELECT * FROM users';
+        const query = 'SELECT id, name, email, phone FROM users';
+        const [rows] = await db.query(query);
+        return rows;
+    }
+    static async getUsersFull() {
+        const query = `SELECT * FROM users`;
         const [rows] = await db.query(query);
         return rows;
     }
@@ -13,18 +19,31 @@ class User {
         const [rows] = await db.query(query, [id]);
         return rows;
     }
+    static async getUserByMail(mail:string){
+        const query = `SELECT * FROM users WHERE email = ?`;
+        const [rows] = await db.query(query, [mail]);
+        return (rows as Array<any>)[0];
+    }
+    static async getUserSessionData(id:string){
+        const query = `SELECT id, name, email, phone, handle, role FROM users WHERE ID = ?`;
+        const [row] = await db.query(query, [id]);
+        return (row as any)[0]; //Fix this thing
+    }
     static async createUser(req: Request) {
-        const { name, email, phone } = req.query;
-        const query = `INSERT INTO users (name, email, phone) VALUES (?, ?, ?)`;
+        const { name, email, password, phone, handle } = req.body;
+        const query = `INSERT INTO users (name, email, password, phone, handle) VALUES (?, ?, ?, ?, ?)`;
         const values = [
         name,
         email || faker.internet.email(),
+        bcrypt.hashSync(password || "password", 1),
         phone || faker.phone.number({ style: 'international' }),
+        handle || name.toLowerCase().replace(" ","_").slice(0,16)
         ];
         try{
-            await db.query(query, values);
+            const insert = await db.query(query, values);
         }catch(error){
-            throw Error("Error inserting data");
+            console.error(error);
+            throw Error(`Error creating user`);
         }
     }
     static async updateUser(id: string, req: Request){
