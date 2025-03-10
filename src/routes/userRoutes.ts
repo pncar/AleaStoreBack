@@ -4,10 +4,10 @@ import { authenticateJWT, verifyIds, verifyRole } from "../middleware/authMiddle
 
 const userRouter = Router();
 
-userRouter.get('/', verifyRole(), getUsers);
+userRouter.get('/', authenticateJWT, verifyRole("admin"), getUsers);
 userRouter.get('/:id', authenticateJWT, verifyIds(), getUserById);
 userRouter.post('/create', createUser);
-userRouter.post('/:id/update', authenticateJWT, updateUser);
+userRouter.post('/:id/update', authenticateJWT, verifyRole("admin"), updateUser);
 userRouter.post('/:id/delete', authenticateJWT, deleteUser);
 
 

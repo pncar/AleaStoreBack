@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 class User {
     static async getUsers() {
-        const query = 'SELECT id, name, email, phone FROM users';
+        const query = 'SELECT id, name, email, phone, role FROM users';
         const [rows] = await db.query(query);
         return rows;
     }
@@ -46,17 +46,21 @@ class User {
             throw Error(`Error creating user`);
         }
     }
-    static async updateUser(id: string, req: Request){
+    static async updateUser(id: string, name: string, email: string, phone: string, role: string){
         const fields: string[] = [];
-        Object.keys(req.query).map((item: string) =>{
-            fields.push(`${item} = ?`);
+        const values: string[] = [];
+        const data = { name, email, phone, role };
+        Object.entries(data).map((item:any)=>{
+            if(item){
+                fields.push(`${item[0]} = ?`);
+                values.push(item[1]);
+            }
         });
         const t_fields = fields.join(", ");
         const query = `UPDATE users SET ${t_fields} WHERE id = ?`;
-        console.log(t_fields);
         try{
-            await db.query(query,[...Object.values(req.query),id]);
-            return query;
+            const [insert] = await db.query(query,[...values,id]);
+            console.log((insert as any).changedRows);
         }catch(error){
             throw Error("Error updating user");
         }

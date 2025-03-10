@@ -7,7 +7,8 @@ exports.up = function(knex) {
         table.increments('id').primary(); 
         table.string('name').notNullable(); 
         table.string('description');
-        table.integer('parent');
+        //table.integer('parent');
+        table.integer('parent').unsigned().references('id').inTable('categories').onDelete('SET NULL');
         table.timestamps(true, true); 
         table.integer('tier');
     });

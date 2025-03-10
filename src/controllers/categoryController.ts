@@ -22,6 +22,28 @@ export const getCategoriesByTier = async (req: Request, res: Response) => {
     }
 }
 
+export const getCategoriesByProduct = async (req: Request, res: Response) => {
+  const { productId } = req.params;
+  try{
+    const categories = await Category.getCategoriesByProduct(productId);
+    res.status(200).json(categories);
+  }catch(error){
+    console.error(error);
+    res.status(500).send(`Error fetching categories of product ${productId}`);
+  }
+}
+
+export const getChildrenCategories = async (req: Request, res: Response) => {
+  const { parent } = req.params;
+  try{
+    const categories = await Category.getChildrenCategories(parent);
+    res.status(200).json(categories);
+  }catch(error){
+    console.error(error);
+    res.status(500).send(`Error fetching categories of parent ${parent}`);
+  }
+}
+
 export const getCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   try{
@@ -35,3 +57,24 @@ export const getCategory = async (req: Request, res: Response) => {
   }
 }
 
+export const createCategory = async (req: Request, res: Response) => {
+  const { name, parent } = req.body;
+  try{
+    const category = await Category.createCategory(name,parent);
+    res.status(200).send({message: `Category ${name} of id ${(category as any).insertId} successfully created.`, insertId: (category as any).insertId});
+  }catch (error){
+    console.error(error);
+    res.status(500).send({message: `Category ${name} couldn't be created.`});
+  }
+}
+
+export const deleteCategory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try{
+    await Category.deleteCategory(id);
+    res.status(200).send({message: `Category ${id} deleted successfully.`});
+  }catch(error){
+    console.error(error);
+    res.status(500).send({message: `Category ${id} coudln't be deleted.`})
+  }
+}

@@ -40,7 +40,7 @@ exports.seed = async function(knex) {
     args[0] = category.id;
     args[1] = category.name;
     args[2] = category.description || "";
-    args[3] = category.parent || 0;
+    args[3] = category.parent || null;
     args[4] = category.tier;
     await knex.raw(`INSERT INTO categories (id, name, description, parent, tier) VALUES (?,?,?,?,?)`,args);
   }
@@ -84,14 +84,51 @@ exports.seed = async function(knex) {
   //await knex.raw(`CREATE VIEW ProductView AS SELECT p.id, p.name, p.description, p.price, p.user_id, u.handle AS user, u.name AS user_name FROM products p JOIN users u ON p.user_id = u.id`);
   //await knex.raw(`CREATE VIEW ProductView AS SELECT id, name, description, price FROM products`);
   await knex.raw(`
-  CREATE VIEW ProductView AS SELECT products.id, products.name, products.description, products.price, products.image, products.updated_at AS date, categories.name AS category, categories.id AS category_id FROM products 
-  JOIN products_categories ON products.id = products_categories.product_id JOIN categories ON products_categories.category_id = categories.id`);
+  CREATE VIEW ProductView AS SELECT 
+  products.id, 
+  products.name, 
+  products.description, 
+  products.price, 
+  products.image, 
+  products.updated_at AS date, 
+  categories.name AS category, 
+  COALESCE(d.rate, 0) discount_rate,
+  ROUND(products.price * (1 - COALESCE(d.rate, 0) / 100)) AS discounted_price,
+  categories.id AS category_id 
+  FROM products
+  LEFT JOIN products_categories ON products.id = products_categories.product_id 
+  LEFT JOIN categories ON products_categories.category_id = categories.id
+  LEFT JOIN products_discounts pd ON products.id = pd.product_id 
+  LEFT JOIN discounts d ON pd.discount_id = d.id
+  `);
+
+  // Added "LEFT JOIN" on products_categories and categories to avoid not including those uncategorized
 
   await knex.raw('DROP VIEW IF EXISTS OrderItemsView');
-  await knex.raw('CREATE VIEW OrderItemsView AS SELECT oi.*, oi.quantity * p.price AS total, p.price FROM orderitems oi JOIN products p ON oi.product_id = p.id');
+  //await knex.raw('CREATE VIEW OrderItemsView AS SELECT oi.*, oi.quantity * p.price AS total, p.price FROM orderitems oi JOIN products p ON oi.product_id = p.id');
+  await knex.raw(`
+  CREATE VIEW OrderItemsView AS SELECT 
+  oi.*, 
+  oi.quantity * p.price AS total_raw, 
+  p.price as price_raw, 
+  oi.quantity * p.discounted_price AS total, 
+  p.discounted_price as price 
+  FROM orderitems oi 
+  JOIN ProductView p ON oi.product_id = p.id
+  `);
 
   await knex.raw('DROP VIEW IF EXISTS OrdersView');
-  await knex.raw('CREATE VIEW OrdersView AS SELECT o.*, SUM(oi.quantity * p.price) AS total FROM orders o JOIN orderitems oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id GROUP BY o.id');
-
+  //await knex.raw('CREATE VIEW OrdersView AS SELECT o.*, SUM(oi.quantity * p.price) AS total FROM orders o JOIN orderitems oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id GROUP BY o.id');
+  await knex.raw(`
+  CREATE VIEW OrdersView AS SELECT 
+  o.*, SUM(oi.quantity * p.price) AS total_raw, 
+  SUM(oi.quantity * p.discounted_price) AS total, 
+  u.name AS user_name 
+  FROM orders o 
+  JOIN OrderItemsView oi ON o.id = oi.order_id 
+  JOIN ProductView p ON oi.product_id = p.id 
+  JOIN users u ON u.id = o.user_id 
+  GROUP BY o.id
+  `);
 
 };

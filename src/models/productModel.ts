@@ -1,6 +1,5 @@
 import db from '../db/database';
 import { faker } from '@faker-js/faker';
-import { Request, Response } from 'express';
 
 interface QueryOptions {
     price_gt?: number;
@@ -50,10 +49,10 @@ class Product {
 
         switch(queryOptions?.order){
             case "ph":
-                query += ` ORDER BY price DESC`;
+                query += ` ORDER BY discounted_price DESC`;
             break;
             case "pl":
-                query += ` ORDER BY price ASC`; 
+                query += ` ORDER BY discounted_price ASC`; 
             break;
             case "o":
                 query += ` ORDER BY date ASC`;
@@ -80,12 +79,20 @@ class Product {
         const [rows] = await db.query(query, [id]);
         return rows;
     }
-    static async setProductCategory(productId: number,categoryId: number){
+    static async setProductCategory(productId: string,categoryId: string){
         const query = `INSERT INTO products_categories (product_id,category_id) VALUES (?,?)`;
         try{
             await db.query(query,[productId,categoryId]);
         }catch(error){
             throw Error(`Error linking product to category`);
+        }
+    }
+    static async setProductDiscount(productId: number, discountId: number){
+        const query = `INSERT INTO products_discounts (product_id,discount_id) VALUES (?,?)`;
+        try{
+            await db.query(query,[productId,discountId]);
+        }catch(error){
+            throw Error(`Error linking discount ${discountId} to product ${productId}`);
         }
     }
     static async createProduct(name: string, description: string, price: string, category: string, image?: string){
@@ -103,6 +110,34 @@ class Product {
             throw Error(`Error inserting product -> ${name}`);
         }
     }
+    static async updateProduct(id: string, name?: string, price?: string, description?: string, image?: string){
+        const fields: string[] = [];
+        const values: string[] = [];
+        if(name){
+            fields.push(`name = ?`);
+            values.push(name);
+        }
+        if(price){
+            fields.push(`price = ?`);
+            values.push(price);
+        }
+        if(description){
+            fields.push(`description = ?`);
+            values.push(description);
+        }
+        if(image){
+            fields.push(`image = ?`);
+            values.push(image);
+        }
+        const t_fields = fields.join(", ");
+        try{
+            const query = `UPDATE products SET ${t_fields} WHERE id = ?`;
+            await db.query(query,[...values,id]);
+        }catch(error){
+            console.error(error);
+            throw Error(`Failed at updating user`);
+        }
+    }
     static async deleteProduct(id: string){
         try{
             const query = `DELETE FROM products WHERE id = ?`;
@@ -110,6 +145,22 @@ class Product {
         }catch(error){
             console.log(error);
             throw Error(`Failed at deleting product ${id}`);
+        }
+    }
+    static async removeDiscountFromProduct(productId: string, discountId: string){
+        const query = `DELETE FROM products_discounts WHERE product_id = ? AND discount_id = ?`;
+        try{
+            await db.query(query,[productId,discountId]);
+        }catch(error){
+            throw Error(`Error removing discount ${discountId} on product ${productId}.`)
+        }
+    }
+    static async removeCategoryFromProduct(productId: string, categoryId: string){
+        const query = `DELETE FROM products_categories WHERE product_id = ? AND category_id = ?`;
+        try{
+            await db.query(query,[productId,categoryId]);
+        }catch(error){
+            throw Error(`Error removing cateogry ${categoryId} on product ${productId}`);
         }
     }
     static async countProducts(){

@@ -1,6 +1,5 @@
 import db from '../db/database';
 import { faker } from '@faker-js/faker';
-import { Request, Response } from 'express';
 
 class Order {
     static async getOrders(){
@@ -8,16 +7,16 @@ class Order {
         const query = `SELECT * FROM OrdersView`;
         const [rows] = await db.query(query);
         const rowsWithItems = await Promise.all((rows as any).map(async(row:any)=>{
-            const query = `SELECT orderitems.id, orderitems.quantity, products.price, products.name FROM orderitems LEFT JOIN products ON orderitems.product_id = products.id WHERE order_id = ?;`
+            const query = `SELECT orderitems.id, orderitems.quantity, orderitems.price as price, products.price as price_raw, products.name FROM OrderItemsView as orderitems LEFT JOIN ProductView as products ON orderitems.product_id = products.id WHERE order_id = ?;`
             const [items] = await db.query(query,[row.id]);
             return {...(row as any),items}
-    }));
+        }));
         return rowsWithItems;
     }
     static async getOrderById(id:string){
         const query = `SELECT * FROM OrdersView WHERE id = ?`;
         let [rows] = await db.query(query, [id]);
-        const itemsQuery = `SELECT * FROM orderitems WHERE order_id = ?`;
+        const itemsQuery = `SELECT * FROM OrderItemsView WHERE order_id = ?`;
         const [items] = await db.query(itemsQuery,[id]);
         return {...(rows as any)[0],items};
     }
@@ -26,7 +25,7 @@ class Order {
         console.log(query);
         const [rows] = await db.query(query,[id]);
         const rowsWithItems = await Promise.all((rows as any).map(async(row:any)=>{
-                const query = `SELECT orderitems.id, orderitems.quantity, products.price, products.name FROM orderitems LEFT JOIN products ON orderitems.product_id = products.id WHERE order_id = ?;`
+                const query = `SELECT orderitems.id, orderitems.quantity, orderitems.price as price, products.price as price_raw, products.name FROM OrderItemsView as orderitems LEFT JOIN ProductView as products ON orderitems.product_id = products.id WHERE order_id = ?;`
                 const [items] = await db.query(query,[row.id]);
                 return {...(row as any),items}
         }));

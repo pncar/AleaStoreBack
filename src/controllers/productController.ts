@@ -26,35 +26,6 @@ export const getProductById = async (req: Request, res: Response) => {
   }
 };
 
-/*
-
-export const getProductsByUser = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try{
-    const products = await Product.getProductsByUser(id);
-    res.status(200).json(products);
-  }catch(error){
-    console.error(error);
-    res.status(500).send(`Error fetching products with id:${id}`);
-  }
-}
-
-*/
-
-export const setProductCategory = async (req: Request, res: Response) => {
-  const { productId, categoryId } = req.query;
-    if (!Number.isInteger(Number(productId)) || !Number.isInteger(Number(categoryId))) {
-      res.status(400).send('Invalid product or category ID');
-    }
-    try{
-      await Product.setProductCategory(Number(productId),Number(categoryId));
-      res.status(200).json(`Product ${productId} and Category ${categoryId} were linked successfully.`);
-    } catch (error){
-      console.error(error);
-      res.status(500).send(`Error setting product category`);
-    }
-}
-
 export const createProduct = async (req: Request, res: Response) => {
   const { name, description, price, category } = req.body;
   const image = req.file?.filename;
@@ -65,7 +36,20 @@ export const createProduct = async (req: Request, res: Response) => {
     res.status(200).send({message: 'Product created successfully'});
   } catch (error) {
       console.error(error);
-      res.status(500).send({message: 'Error creating product'});
+      res.status(500).send({message: 'Error creating product.'});
+  }
+}
+
+export const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {name, price, description} = req.body;
+  const image = req.file?.filename;
+  try{
+    await Product.updateProduct(id,name,price,description,image);
+    res.status(200).send({message: `Product updated successfully`});
+  }catch(error){
+    console.error(error);
+    res.status(500).send({message: `Error updating product.`});
   }
 }
 
@@ -77,6 +61,50 @@ export const deleteProduct = async (req: Request, res: Response) => {
   }catch( error ){
       console.error(error);
       res.status(500).send(`Error deleting product`);
+  }
+}
+
+export const setProductDiscount = async (req: Request, res: Response) => {
+  const { productId, discountId } = req.body;
+  try{
+    await Product.setProductDiscount(productId,discountId);
+    res.status(200).send({message: `Discount ${discountId} successfully linked to Product ${productId}`});
+  }catch(error){
+    console.error(error);
+    res.status(500).send({message: `Error linking Discount ${discountId} to Product ${productId}`});
+  }
+}
+
+export const setProductCategory = async (req: Request, res: Response) => {
+  const { productId, categoryId } = req.body;
+    try{
+      await Product.setProductCategory(productId,categoryId);
+      res.status(200).json(`Product ${productId} and Category ${categoryId} were linked successfully.`);
+    } catch (error){
+      console.error(error);
+      res.status(500).send(`Error setting product category`);
+    }
+}
+
+export const removeDiscountFromProduct = async (req: Request, res: Response) => {
+  const { productId, discountId } = req.body;
+  try { 
+    await Product.removeDiscountFromProduct(productId,discountId);
+    res.status(200).send({message: `Discount ${discountId} successfully removed from product ${productId}`});
+  } catch(error){
+    console.error(error);
+    res.status(500).send(`Error removing discount ${discountId} from product ${productId}`);
+  }
+}
+
+export const removeCategoryFromProduct = async (req: Request, res: Response) => {
+  const { productId, categoryId } = req.body;
+  try {
+    await Product.removeCategoryFromProduct(productId,categoryId);
+    res.status(200).send({message: `Category ${categoryId} successfully removed from product ${productId}`});
+  } catch(error){
+    console.error(error);
+    res.status(500).send(`Error removing category ${categoryId} from product ${productId}`);
   }
 }
 

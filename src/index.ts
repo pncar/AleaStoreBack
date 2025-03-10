@@ -8,6 +8,8 @@ import productRouter from './routes/productRoutes';
 import categoryRouter from './routes/categoryRoutes';
 import authRouter from "./routes/authRoutes";
 import orderRouter from "./routes/orderRoutes";
+import discountRouter from "./routes/discountRoutes";
+import sectionRouter from "./routes/sectionRoutes";
 import { errorHandler } from './middleware/errorHandler';
 import fs from "fs";
 
@@ -60,6 +62,8 @@ app.use('/users', userRouter);
 app.use('/products', productRouter);
 app.use('/categories', categoryRouter);
 app.use('/orders', orderRouter);
+app.use('/discounts', discountRouter);
+app.use('/sections', sectionRouter);
 
 app.use(errorHandler); // After routes, before listen
 

@@ -35,10 +35,10 @@ import User from "../models/userModel";
 
     export const updateUser = async (req: Request, res: Response) => {
         const { id } = req.params;
-        const { name, email, phone } = req.query || {};
+        const { name, email, phone, role } = req.body;
         try{
-            const query = await User.updateUser(id, req);
-            res.status(200).send(query);
+            const query = await User.updateUser(id, name, email, phone, role);
+            res.status(200).send(`User with id ${id} was updated successfully.`);
         }catch (error) {    
             console.error(error);
             res.status(500).send('Error updating user');
