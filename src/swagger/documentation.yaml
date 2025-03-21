@@ -1,0 +1,1093 @@
+openapi: 3.0.0
+info:
+  title: My API
+  description: API documentation for my application
+  version: 1.0.0
+  
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    User:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          description: User's ID
+        name:
+          type: string
+          description: User's Name
+        email:
+          type: string
+          description: User's email
+        phone:
+          type: string
+          description: User's phone
+        handle:
+          type: string
+          description: User's handle
+        role:
+          type: string
+          description: User's role
+          enum: ["admin","user"]
+
+    Section:
+      type: object
+      required:
+         - name
+      properties:
+        id:
+          type: integer
+          description: Section ID
+        name:
+          type: string
+          description: Section Name
+      example:
+          id: 1
+          name: Popular Last Week
+
+    Category:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          description: Category ID
+        name:
+          type: string
+          description: Category Name
+        description:
+          type: string
+          description: Category's Description
+        parent:
+          type: integer
+          description: Category's Parent Category (Can be Null)
+          nullable: true
+        tier:
+          type: integer
+          description: Category's Tier (Can be Null)
+          nullable: true
+      example:
+        id: 6
+        name: Headphones
+        description: Audio output device, can be connected to PC, Laptop, Phone, Tablet.
+        parent: 2
+        tier: 2
+
+    Product:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          description: Product ID
+        name:
+          type: string
+          description: Product Name
+        description:
+          type: string
+          description: Product's Description
+        price:
+          type: integer
+          description: Product's price
+          nullable: false
+        price_discounted:
+          type: integer
+          description: Product's price including discounts
+          nullable: false
+        category:
+          type: string
+          description: Product's category
+        category_id:
+          type: integer
+          description: Product's category ID
+      example:
+        id: 1
+        name: Headphones Gordus G5
+        description: Audio output device, can be connected to PC, Laptop, Phone, Tablet.
+        price: 500
+        discounted_price: 400
+        category: Headphones
+        category_id: 6
+
+    Discount:
+      type: object
+      required:
+         - name
+      properties:
+        id:
+            type: integer
+            description: Discount ID
+        name:
+            type: string
+            description: Discount Name
+        type:
+            type: string
+            description: Discount Type
+        rate:
+            type: integer
+            description: Discount Rate
+            enum: ["discount"]
+      example:
+          id: 1
+          name: Potassium Day Discount
+          rate: 25
+          type: discount
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Order ID
+        user_id:
+          type: integer
+          description: ID of Order's User
+        user_name:
+          type: string
+          description: Name of Oder's User
+        total:
+          type: integer
+          description: Total amount of Order (including discounts)
+        total_raw:
+          type: integer
+          description: Total amount of Order (without discounts)
+        status:
+          type: string
+          description: Order's Status
+          enum: ["paid","cancelled","pending"]
+        items:
+          type: array
+          items:
+              $ref: '#/components/Schemas/OrderItems'
+          description: Order's Items
+
+      example:
+        id: 8
+        user_id: 5
+        user_name: Jon Doe
+        total: 750
+        total_raw: 1000
+        status: paid
+        items:
+          - id: 5
+            order_id: 2
+            product_id: 58
+            quantity: 16
+            total_raw: 65600
+            price_raw: 4100
+            total: 13120
+            price: 820
+          - id: 3
+            order_id: 2
+            product_id: 57
+            quantity: 2
+            total_raw: 13000
+            price_raw: 6500
+            total: 6500
+            price: 3250
+
+
+    OrderItem:
+      type: object
+      properties:
+        order_id:
+          type: integer
+          description: Order ID
+        product_id:
+          type: integer
+          description: Product ID
+        quantity:
+          type: integer
+          description: Product Quantity
+        price:
+          type: integer
+          description: Product's Price (including discounts)
+        price_raw:
+          type: integer
+          description: Product's Price (without discounts)
+        total:
+          type: integer
+          description: Subtotal of Product in Order (Price * Quantity), including discounts.
+        total_raw:
+          type: integer
+          description: Subtotal of Product in Order (Price * Quantity), without discounts.
+      example:
+        id: 5
+        order_id: 2
+        product_id: 58
+        quantity: 16
+        total_raw: 65600
+        price_raw: 4100
+        total: 13120
+        price: 820
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+      example:
+        message: Resource not found
+        
+  responses:
+      NotFoundError:
+        description: Resource not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+  
+      InternalServerError:
+         description: Internal server error
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/ErrorResponse'
+        
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+    
+tags: 
+  - name: Categories
+    description: Categories tag
+  - name: Sections
+    description: Sections tag
+  - name: Products
+    description: Products tag
+  - name: Discounts
+    description: Discounts tag
+  - name: Orders
+    description: Orders tag
+  - name: Users
+    description: Users tag
+
+paths:
+
+#------------------------------ CATEGORIES       
+
+  /api/categories:
+    get:
+      summary: Get a list of all categories
+      description: ...
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A list of all categories.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Category'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      summary: Create a new category
+      description: Creates a new category
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Category'
+      responses:
+        201:
+          description: Category created successfully.
+          
+  /api/categories/tier/{tier}:
+    get:
+      summary: Retrieve all categories on a Tier
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: tier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of categories.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+
+  /api/categories/product/{productId}:
+    get:
+      summary: Retrieve the category of a product
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/categories/{parent}/children:
+    get:
+      summary: Get children category of parent category
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: parent
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+  /api/categories/{id}:
+    get:
+      summary: Get category by ID
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    patch:
+      summary: Update category by ID
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Section updated successfully.  
+    delete:
+      summary: Delete category by ID
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Section deleted successfully.
+
+#------------------------------ SECTIONS             
+          
+  /api/sections:
+    get:
+      summary: Retrieve all sections
+      description: Returns a list of sections.
+      tags: [Sections]
+      responses:
+        200:
+          description: A list of sections.
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    post:
+      summary: Create a new section
+      description: Creates a new section.
+      tags: [Sections]
+      parameters:
+        - in: body
+          name: name
+          required: true
+          schema:
+            type: istring
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Section created successfully.
+  
+  /api/sections/{id}:
+    get:
+      summary: Retrieve a section by ID
+      description: Returns a section object.
+      tags: [Sections]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A section object.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+ 
+  /api/sections/{id}/categories:
+    get:
+      summary: Retrieve categories for a section
+      description: Returns a list of categories which are bound to the Section of ID.
+      tags: [Sections, Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of categories.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        400:
+          $ref: '#/components/responses/NotFoundError'
+ 
+  /api/sections/{id}/:
+    patch:
+      summary: Update a section
+      tags: [Sections]
+      description: Updates a section.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: name
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Section updated successfully.
+    delete:
+      summary: Delete a section
+      tags: [Sections]
+      description: Deletes a section.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Section deleted successfully.
+ 
+  /api/sections/{id}/categories/:
+    post:
+      summary: Add a category to a section
+      description: Adds a category to a section.
+      tags: [Sections, Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: body
+          name: sectionId
+          required: true
+          schema:
+            type: integer
+        - in: body
+          name: categoryId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Category added successfully.
+ 
+  /api/sections/{id}/categories/{categoryId}/:
+    delete:
+      summary: Remove a category from a section
+      description: Removes a category from a section.
+      tags: [Sections, Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: categoryId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Category removed successfully.
+
+#------------------------------ PRODUCTS      
+          
+  /api/products:
+    get:
+      summary: Retrieve all products
+      description: Returns a list of products.
+      tags: [Products]
+      parameters:
+        - in: query
+          name: price_gt
+          description: Limits products only to those of price greater than value.
+          schema:
+            type: string
+        - in: query
+          name: price_lt
+          description: Limits products only to those of price lower than value.
+          schema:
+            type: string
+        - in: query
+          name: price_eq
+          description: Limits products only to those of price equal of value.
+          schema:
+            type: string
+        - in: query
+          name: subject
+          description: Limits products only to those whose name match or partially contain the value.
+          schema:
+            type: string
+        - in: query
+          name: categories
+          description: Limits products only to those whose categories match the categories entered.
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: order
+          description: Order products by certain parameters ph (highest price), pl (lowest price), o (older), l (latest)
+          schema:
+              type: array
+              items:
+                type: string
+                enum: ["ph", "pl", "o", "l"]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    post:
+      summary: Create a new product
+      description: Creates a new product.
+      tags: [Products]
+      parameters:
+        - in: body
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: description
+          required: false
+          schema:
+            type: string
+        - in: body
+          name: price
+          required: true
+          schema:
+            type: integer
+        - in: body
+          name: category
+          description: ID of the Category the product is in
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Product created successfully.
+
+  /api/products/total:
+    get:
+      summary: Get the total amount of products
+      tags: [Products]
+      responses:
+        200:
+          description: Returns the total amount of products in the store which satisfy the query options (if any).
+          content:
+            application/json:
+              schema:
+                type: integer
+
+  /api/products/{id}:
+    get:
+      summary: Get Product by ID
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    patch:
+      summary: Updates a Product by ID
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: name
+          schema:
+            type: string
+        - in: body
+          name: price
+          schema:
+            type: integer
+        - in: body
+          name: description
+          schema:
+            type: string
+    delete:
+      summary: Deletes a Product by ID
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+
+  /api/products/{productId}/categories/:
+    post:
+      summary: Adds a category to a Product.
+      tags: [Products,Categories]
+      parameters:
+        - in: path
+          name: productId
+          description: ID of Product to add a category to.
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: categoryId
+          description: ID of Category that will be added to a Product.
+          required: true
+          schema:
+            type: integer
+
+  /api/products/{productId}/categories/${discountId}:
+    delete:
+      summary: Removes a category from a Product.
+      tags: [Products,Categories]
+      parameters:
+        - in: path
+          name: productId
+          description: ID of Product to remove category from.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: categoryId
+          description: ID of Category to be removed from Product.
+          required: true
+          schema:
+            type: string
+
+  /api/products/${productId}/discounts:
+    post:
+      summary: Adds a discount to a Product
+      tags: [Products, Discounts]
+      parameters:
+        - in: path
+          name: productId
+          description: ID of Product to add a discount to.
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: discountId
+          description: ID of Discount that will be added to a Product.
+          required: true
+          schema:
+            type: integer
+  
+  /api/products/${productId}/discounts/${discountId}:
+    delete:
+      summary: Removes a discount from a Product.
+      tags: [Products, Discounts]
+      parameters:
+        - in: path
+          name: productId
+          description: ID of Product to remove Discount from.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: discountId
+          description: ID of Discount to be removed from Product.
+          required: true
+          schema:
+            type: string
+
+#------------------------------ DISCOUNTS 
+
+  /api/discounts/:
+    get:
+      summary: Retrieve all Discounts.
+      tags: [Discounts]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Discount'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    post:
+      summary: Create a new Discount.
+      tags: [Discounts]
+      parameters:
+        - in: body
+          name: name
+          description: Discount's name
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: rate
+          description: Discount's rate (percentage discounted)
+          required: true
+          schema:
+            type: integer
+
+
+  /api/discounts/product/{productId}:
+    get:
+      summary: Retrieves Discount associated to Product.
+      tags: [Discounts, Products]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Discount'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+
+  /api/{id}:
+    get:
+      summary: Retrieves Discount of ID.
+      tags: [Discounts]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Discount'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Updates a Discount by ID.
+      tags: [Discounts]
+      parameters:
+        - in: path
+          description: Discount's ID
+          required: true
+          schema:
+            type: string
+        - in: body
+          description: Discount's name
+          schema:
+            type: string
+        - in: body
+          name: rate
+          description: Discount's rate (percentage discounted)
+          schema:
+            type: integer
+    delete:
+      summary: Deletes a Discount by ID.
+      tags: [Discounts]
+      parameters:
+        - in: path
+          description: Discount's ID
+          required: true
+          schema:
+            type: string
+          
+#------------------------------ ORDERS
+
+  /api/orders/:
+    get:
+      summary: Retrieve all Orders.
+      tags: [Orders]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    post:
+      summary: Create new Order
+      tags: [Orders]
+      parameters:
+        - in: body
+          name: user_id
+          description: ID of User of Order
+          required: true
+          schema:
+            type: integer
+        - in: body
+          name: list
+          description: Array of Items to be including in Order
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                - product_id:
+                  description: ID of Product to be included in Order Items.
+                  schema:
+                    type: integer
+                - quantity:
+                  description: Quantity of Product to be included in Order Items.
+                  schema:
+                    type: integer
+
+
+  /api/orders/{id}:
+    get:
+      summary: Retrieve Order by ID
+      tags: [Orders]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Update Order
+      tags: [Orders]
+      parameters:
+        - in: path
+          name: id
+          description: Order's ID
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: status
+          description: Status of Order
+          schema:
+            type: string
+            enum: ["pending","paid","cancelled"]
+    delete:
+      summary: Delete Order by ID
+      tags: [Orders]
+      parameters:
+        - in: path
+          name: id
+          description: Order's ID
+          required: true
+          schema:
+            type: string
+
+  /api/orders/user/{id}:
+    get:
+      summary: Retrieve Orders of User of specificed ID
+      tags: [Orders]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+
+#------------------------------ USERS
+
+  /api/users/:
+    get:
+      summary: Retrieve all Userss.
+      tags: [Users]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    post:
+      summary: Create new User
+      tags: [Users]
+      parameters:
+        - in: body
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: email
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: password 
+          required: true
+          schema:
+            type: string # CHECK THIS LATER
+        - in: body
+          name: handle
+          schema:
+            type: string # CURRENTLY NOT IMPLEMENTED
+  
+  /api/users/{id}:
+    get:
+      summary: Retrieve User by ID
+      tags: [Users]
+      responses:
+        200:
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        404:
+           $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Update User
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          description: User's ID
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: name
+          schema:
+            type: string
+        - in: body
+          name: name
+          schema:
+            type: string
+        - in: body
+          name: email
+          schema:
+            type: string
+        - in: body
+          name: phone
+          schema:
+            type: string
+        - in: body
+          name: role
+          schema:
+            type: string
+
+    delete:
+      summary: Delete User by ID
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          description: User's ID
+          required: true
+          schema:
+            type: string

@@ -1,13 +1,9 @@
 import { Request, Response } from 'express';
 import Product from "../models/productModel";
-import multer from "multer";
-
-const upload = multer({ dest: './uploads/' });
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
     const products = await Product.getProducts(req.query);
-    console.log(multer);
     res.status(200).json(products);
   } catch(error){
     console.error(error);
@@ -65,7 +61,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
 }
 
 export const setProductDiscount = async (req: Request, res: Response) => {
-  const { productId, discountId } = req.body;
+  const { productId } = req.params;
+  const { discountId } = req.body;
   try{
     await Product.setProductDiscount(productId,discountId);
     res.status(200).send({message: `Discount ${discountId} successfully linked to Product ${productId}`});
@@ -76,7 +73,8 @@ export const setProductDiscount = async (req: Request, res: Response) => {
 }
 
 export const setProductCategory = async (req: Request, res: Response) => {
-  const { productId, categoryId } = req.body;
+  const { productId } = req.params;
+  const { categoryId } = req.body;
     try{
       await Product.setProductCategory(productId,categoryId);
       res.status(200).json(`Product ${productId} and Category ${categoryId} were linked successfully.`);
@@ -87,7 +85,7 @@ export const setProductCategory = async (req: Request, res: Response) => {
 }
 
 export const removeDiscountFromProduct = async (req: Request, res: Response) => {
-  const { productId, discountId } = req.body;
+  const { productId, discountId } = req.params;
   try { 
     await Product.removeDiscountFromProduct(productId,discountId);
     res.status(200).send({message: `Discount ${discountId} successfully removed from product ${productId}`});
@@ -98,7 +96,7 @@ export const removeDiscountFromProduct = async (req: Request, res: Response) => 
 }
 
 export const removeCategoryFromProduct = async (req: Request, res: Response) => {
-  const { productId, categoryId } = req.body;
+  const { productId, categoryId } = req.params;
   try {
     await Product.removeCategoryFromProduct(productId,categoryId);
     res.status(200).send({message: `Category ${categoryId} successfully removed from product ${productId}`});
@@ -111,7 +109,7 @@ export const removeCategoryFromProduct = async (req: Request, res: Response) => 
 export const countProducts = async (req: Request, res: Response) => {
   try{
     const total = await Product.countProducts();
-    res.status(200).send(total);
+    res.status(200).json(total);
   }catch(error){
     console.error(error);
     res.status(500).send(`Error counting products`);

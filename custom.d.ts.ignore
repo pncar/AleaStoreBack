@@ -1,0 +1,52 @@
+declare type OrderType = {
+	id: number;
+	user_id: number;
+	status: string;
+	total: number;
+	total_raw: number;
+	user_name: string;
+}
+declare type OrderItemType = {
+  id: number;
+  quantity: number;
+  name: string;
+  price: number;
+  price_raw: number;
+  total: number;
+  total_raw: number;
+}
+declare type SectionType = {
+	id: number;
+	name: string;
+}
+declare type DiscountType = {
+	id: number;
+	name: string;
+	rate: number;
+	type: string;
+}
+declare type CategoryType = {
+	id: number;
+	description?: string;
+	parent?: number | null;
+}
+declare type UserType = {
+	id: number;
+	email: string;
+	password: string;
+	role: string;
+	phone?: string;
+	handle?: string;
+}
+declare type ProductType = {
+	id: number;
+	name: string;
+	identifier: string;
+	description: string;
+	image?: string | null;
+	base_id: number;
+	price: number;
+	category_id: number;
+	discount_rate: number;
+	discounted_price: number;
+}

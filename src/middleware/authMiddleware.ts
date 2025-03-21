@@ -6,6 +6,7 @@ import Order from "../models/orderModel";
 
 const SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction): any => {
   const token = req.cookies.authToken;
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -15,7 +16,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   //@ts-ignore
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err || !decoded) return res.status(403).json({ message: "Invalid token" });
-    (req as any).user = decoded;
+    req.user = decoded;
     next();
   });
 };
@@ -49,7 +50,7 @@ export const verifyRole = (role:string = "admin") => {
     }
     const token = jwt.verify(req.cookies.authToken, SECRET) as { id: string};
     const u = await User.getUserById(token.id);
-    const role = (u as any)[0].role;
+    const role = u[0].role;
     if(role !== "admin"){
       console.log("Shouldn't have access");
       return res.status(403).send({ message: `Forbidden`});

@@ -48,7 +48,6 @@ export const getCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   try{
     const category = await Category.getCategoryById(id);
-    //@ts-ignore
     res.status(200).json(category);
   }
   catch (error){
@@ -61,10 +60,22 @@ export const createCategory = async (req: Request, res: Response) => {
   const { name, parent } = req.body;
   try{
     const category = await Category.createCategory(name,parent);
-    res.status(200).send({message: `Category ${name} of id ${(category as any).insertId} successfully created.`, insertId: (category as any).insertId});
+    res.status(200).send({message: `Category ${name} of id ${category.insertId} successfully created.`, insertId: category.insertId});
   }catch (error){
     console.error(error);
     res.status(500).send({message: `Category ${name} couldn't be created.`});
+  }
+}
+
+export const updateCategory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  try{
+    await Category.updateCategory(id,name);
+    res.status(200).send({message: `Category was successfully updated.`});
+  }catch(error){
+    console.error(error);
+    res.status(500).send({message: `Category couldn't be updated.`});
   }
 }
 

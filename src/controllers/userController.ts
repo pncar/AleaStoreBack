@@ -23,9 +23,9 @@ import User from "../models/userModel";
     };
     
     export const createUser = async (req: Request, res: Response) => {
-        const { name, email, password, phone, handle } = req.query;
+        const { name, email, password, phone, handle } = req.body;
         try {
-            await User.createUser(req);
+            await User.createUser(name,email,password,phone,handle);
             res.status(200).send('User created successfully');
         } catch (error) {
             console.error(error);

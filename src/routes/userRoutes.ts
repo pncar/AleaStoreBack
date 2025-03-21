@@ -6,9 +6,9 @@ const userRouter = Router();
 
 userRouter.get('/', authenticateJWT, verifyRole("admin"), getUsers);
 userRouter.get('/:id', authenticateJWT, verifyIds(), getUserById);
-userRouter.post('/create', createUser);
-userRouter.post('/:id/update', authenticateJWT, verifyRole("admin"), updateUser);
-userRouter.post('/:id/delete', authenticateJWT, deleteUser);
+userRouter.post('/', createUser);
+userRouter.patch('/:id/', authenticateJWT, verifyRole("admin"), updateUser);
+userRouter.delete('/:id/', authenticateJWT, deleteUser);
 
 
 export default userRouter;

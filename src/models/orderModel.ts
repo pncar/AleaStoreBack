@@ -1,33 +1,32 @@
 import db from '../db/database';
 import { faker } from '@faker-js/faker';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 class Order {
     static async getOrders(){
-        //const query = 'SELECT * FROM products';
         const query = `SELECT * FROM OrdersView`;
-        const [rows] = await db.query(query);
-        const rowsWithItems = await Promise.all((rows as any).map(async(row:any)=>{
+        const [rows] = await db.query<OrderType[] & RowDataPacket[]>(query);
+        const rowsWithItems = await Promise.all(rows.map(async(row:OrderType)=>{
             const query = `SELECT orderitems.id, orderitems.quantity, orderitems.price as price, products.price as price_raw, products.name FROM OrderItemsView as orderitems LEFT JOIN ProductView as products ON orderitems.product_id = products.id WHERE order_id = ?;`
             const [items] = await db.query(query,[row.id]);
-            return {...(row as any),items}
+            return {...row,items}
         }));
         return rowsWithItems;
     }
     static async getOrderById(id:string){
         const query = `SELECT * FROM OrdersView WHERE id = ?`;
-        let [rows] = await db.query(query, [id]);
+        let [rows] = await db.query<OrderType[] & RowDataPacket[]>(query, [id]);
         const itemsQuery = `SELECT * FROM OrderItemsView WHERE order_id = ?`;
-        const [items] = await db.query(itemsQuery,[id]);
-        return {...(rows as any)[0],items};
+        const [items] = await db.query<ResultSetHeader>(itemsQuery,[id]);
+        return {...rows[0],items};
     }
     static async getOrdersByUser(id: string, role: string = "user"){
         const query = `SELECT * FROM OrdersView WHERE user_id = ? ${role === "user" ? ` AND status <> 'paid' AND status <> 'cancelled' ` : ``}`;
-        console.log(query);
-        const [rows] = await db.query(query,[id]);
-        const rowsWithItems = await Promise.all((rows as any).map(async(row:any)=>{
+        const [rows] = await db.query<OrderType[] & RowDataPacket[]>(query,[id]);
+        const rowsWithItems = await Promise.all(rows.map(async(row:OrderType)=>{
                 const query = `SELECT orderitems.id, orderitems.quantity, orderitems.price as price, products.price as price_raw, products.name FROM OrderItemsView as orderitems LEFT JOIN ProductView as products ON orderitems.product_id = products.id WHERE order_id = ?;`
                 const [items] = await db.query(query,[row.id]);
-                return {...(row as any),items}
+                return {...row,items}
         }));
         return rowsWithItems;
     }
@@ -36,12 +35,10 @@ class Order {
         const query = `INSERT INTO orders (user_id) VALUES (?)`;
         const values = [userId];
         try{
-            const [insert] = await db.query(query, values);
-            //const nog = await (insert as any).insertId;
+            const [insert] = await db.query<ResultSetHeader>(query, values);
             for(const item of list){
-                // Note: Price should not be there, it should automatically get the item price, I think same with total
-                console.log(`INSERT INTO orderitems (order_id, product_id, quantity) VALUES (${(insert as any).insertId}, ${item.id}, ${item.q})`);
-                await db.query(`INSERT INTO orderitems(order_id, product_id, quantity) VALUES (?,?,?)`,[(insert as any).insertId,item.id,item.q]);
+                console.log(`INSERT INTO orderitems (order_id, product_id, quantity) VALUES (${insert.insertId}, ${item.id}, ${item.q})`);
+                await db.query(`INSERT INTO orderitems(order_id, product_id, quantity) VALUES (?,?,?)`,[insert.insertId,item.id,item.q]);
             }
         }catch(error){
             console.log(error);

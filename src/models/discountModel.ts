@@ -20,10 +20,7 @@ class Discount {
         const query = `INSERT INTO discounts (type, name, rate) VALUES (?,?,?)`;
         const values = ["discount",name,rate];
         try{
-            //const [insert] = await db.query(query,values);
             await db.query(query,values);
-            //const nog = await (insert as any).insertId;
-            //await db.query(`INSERT INTO products_discounts (product_id, discount_id) VALUES (?,?)`,[productId,(insert as any).insertId]);
         }catch(error){
             console.log(error);
             throw Error(`Error creating discount.`);
@@ -34,7 +31,7 @@ class Discount {
         const values: string[] = [];
         const data = {name, rate};
 
-        Object.entries(data).map((item:any)=>{
+        Object.entries(data).map((item:[string,string])=>{
             fields.push(`${item[0]} = ?`);
             values.push(item[1]);
         });

@@ -35,7 +35,7 @@ export const createSection = async (req: Request, res: Response) => {
     const { name } = req.body;
     try{
         await Section.createSection(name);
-        res.status(200).send({message: `Section with name ${name} was created successfully.`});
+        res.status(201).send({message: `Section with name ${name} was created successfully.`});
     }catch(error){
         console.error(error);
         res.status(500).send({message: `Error creating section with name: ${name}.`});
@@ -63,7 +63,8 @@ export const deleteSection = async (req: Request, res: Response) => {
     }
 }
 export const addCategory = async (req: Request, res: Response) => {
-    const {categoryId,sectionId} = req.body;
+    const {categoryId} = req.body;
+    const {sectionId} = req.params;
     try{
         await Section.addCategory(categoryId,sectionId);
         res.status(200).send({message: `Category ${categoryId} was successfully added to section ${sectionId}.`})
@@ -73,7 +74,7 @@ export const addCategory = async (req: Request, res: Response) => {
     }
 }
 export const removeCategory = async (req: Request, res: Response) => {
-    const {categoryId,sectionId} = req.body;
+    const {categoryId,sectionId} = req.params;
     try{
         await Section.removeCategory(categoryId,sectionId);
         res.status(200).send({message: `Category ${categoryId} was successfully removed from section ${sectionId}.`});

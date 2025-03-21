@@ -1,8 +1,6 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from 'path';
 import dotenv from "dotenv";
-import {papu} from "./papu";
-import db from "./db/database";
 import userRouter from './routes/userRoutes';
 import productRouter from './routes/productRoutes';
 import categoryRouter from './routes/categoryRoutes';
@@ -11,75 +9,78 @@ import orderRouter from "./routes/orderRoutes";
 import discountRouter from "./routes/discountRoutes";
 import sectionRouter from "./routes/sectionRoutes";
 import { errorHandler } from './middleware/errorHandler';
-import fs from "fs";
-
-import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
-
+import swaggerUI from "swagger-ui-express";
+import specs from "./swagger/swagger";
+import fs from "fs";
+import yaml from "yaml";
 
 const cors = require('cors');
+const morgan = require('morgan');
 
-// configures dotenv to work in your application
+
 dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT;
 
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms',{
+  skip: (req:Request, res:Response) => res.statusCode === 304,
+}));
+
+const loadDocumentation = () => {
+  const docRaw = fs.readFileSync("./src/swagger/documentation.yaml", "utf-8");
+  return yaml.parse(docRaw);
+};
+
+let documentation = loadDocumentation();
+
+fs.watchFile("./src/swagger/documentation.yaml", () => {
+  console.log("Reloading API documentation...");
+  documentation = loadDocumentation();
+});
+
+//app.use("/api-docs/",swaggerUI.serve,swaggerUI.setup(specs));
+
+app.use("/api-docs/", swaggerUI.serve, async (req: Request, res: Response, next: NextFunction) => {
+  //@ts-ignore Don't know other way
+  return swaggerUI.setup(loadDocumentation(), { cacheControl: false })(req, res, next);
+});
+
 app.use("/uploads", express.static(path.resolve(__dirname, "..", "uploads")));
-console.log("Serving static files from:", path.resolve(__dirname, "..", "uploads"));
+//console.log("Serving static files from:", path.resolve(__dirname, "..", "uploads"));
 
 app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true, // Allow cookies
+  origin: process.env.CLIENT_URL,
+  credentials: true,
 }));
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/", (req: Request, res: Response) => { 
-  res.status(200).send(`Hello`);
+app.get("/api/", (req: Request, res: Response) => { 
+  res.status(200).send(`MyStore`);
 }); 
 
-app.get("/hello/:name", (req: Request, res: Response) => {
-  const {name} = req.params;
-  res.status(200).send(`${papu} ${name}`);
+app.use("/api/auth", authRouter);
+
+app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
+app.use('/api/categories', categoryRouter);
+app.use('/api/orders', orderRouter);
+app.use('/api/discounts', discountRouter);
+app.use('/api/sections', sectionRouter);
+
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ error: "Not Found" });
 });
 
-app.get('/test-error', (req: Request, res: Response) => {
-  throw new Error('This is a simulated error!');
-});
-
-app.get("/testarossa",(req: Request, res: Response)=>{
-  const cats = fs.readFileSync('seeds/categories.yaml', 'utf8');
-  const jcats = JSON.parse(fs.readFileSync('seeds/categories.json', 'utf8'));
-
-  res.status(200).send(jcats);
-});
-
-app.use("/auth", authRouter);
-
-app.use('/users', userRouter);
-app.use('/products', productRouter);
-app.use('/categories', categoryRouter);
-app.use('/orders', orderRouter);
-app.use('/discounts', discountRouter);
-app.use('/sections', sectionRouter);
-
-app.use(errorHandler); // After routes, before listen
+app.use(errorHandler); // After Routes, Before Listen
 
 
 app.listen(PORT, () => { 
-  console.log("Server running at PORT: ", PORT); 
+  console.log("Server running at PORT: ", PORT || 3000); 
 }).on("error", (error) => {
-  // gracefully handle error
   throw new Error(error.message);
 });
-
-async function testConnection() {
-  try {
-    const [rows] = await db.query('SELECT 1');
-    console.log('Connected to MySQL. Test Query Result:', rows);
-  } catch (error) {
-    console.error('MySQL connection error:', error);
-  }
-}

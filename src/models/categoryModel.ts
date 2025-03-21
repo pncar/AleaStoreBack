@@ -1,4 +1,5 @@
 import db from '../db/database';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 class Category {
     static async getCategories(){
@@ -29,9 +30,10 @@ class Category {
     static async createCategory(name: string, parent: string){
         const query = `INSERT INTO categories (name,parent) VALUES (?,?)`;
         try{
-            const [rows] = await db.query(query,[name,parent]);
+            const [rows] = await db.query<ResultSetHeader>(query,[name,parent || null]);
             return rows;
         }catch(error){
+            console.error(error);
             throw Error(`Error creating category`);
         }
     }
@@ -41,6 +43,14 @@ class Category {
             await db.query(query,[parentId,id]);
         }catch(error){
             throw Error(`Error setting parent ${parentId} to category ${id}`);
+        }
+    }
+    static async updateCategory(id:string, name:string){
+        const query = `UPDATE categories SET name = ? WHERE id = ?`;
+        try{
+            await db.query(query,[name,id]);
+        }catch(error){
+            throw Error(`Error updating category of id ${id}.`);
         }
     }
     static async deleteCategory(id:string){

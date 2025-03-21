@@ -7,8 +7,8 @@ const discountRouter = Router();
 discountRouter.get(`/`,authenticateJWT, verifyRole("admin"), getDiscounts);
 discountRouter.get(`/product/:productId`,authenticateJWT, verifyRole("admin"), getDiscountByProduct);
 discountRouter.get(`/:id`,authenticateJWT, verifyRole("admin"), getDiscountById);
-discountRouter.post(`/create`, authenticateJWT, verifyRole("admin"), createDiscount);
-discountRouter.post(`/update/:id`,authenticateJWT, verifyRole("admin"), updateDiscount);
-discountRouter.post(`/delete/:id`,authenticateJWT, verifyRole("admin"),deleteDiscount);
+discountRouter.post(`/`, authenticateJWT, verifyRole("admin"), createDiscount);
+discountRouter.patch(`/:id`,authenticateJWT, verifyRole("admin"), updateDiscount);
+discountRouter.delete(`/:id`,authenticateJWT, verifyRole("admin"),deleteDiscount);
 
 export default discountRouter;

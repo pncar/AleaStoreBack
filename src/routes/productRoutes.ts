@@ -3,12 +3,12 @@ import { getProducts, getProductById, createProduct, updateProduct, deleteProduc
 import { validateProduct, upload } from "../middleware/validations";
 import { authenticateJWT, verifyRole } from "../middleware/authMiddleware";
 
-const userRouter = Router();
+const productRouter = Router();
 
-userRouter.get('/', getProducts);
-userRouter.get('/total', countProducts);
-userRouter.get('/:id', getProductById);
-userRouter.post(`/create`, authenticateJWT, verifyRole("admin"), (req, res, next) => {
+productRouter.get('/', getProducts);
+productRouter.get('/total', countProducts);
+productRouter.get('/:id', getProductById);
+productRouter.post(`/`, authenticateJWT, verifyRole("admin"), (req, res, next) => {
     upload.single("image")(req, res, (err: any) => {
       if (err) {
         return res.status(400).json({ error: err.message });
@@ -16,11 +16,12 @@ userRouter.post(`/create`, authenticateJWT, verifyRole("admin"), (req, res, next
       validateProduct(req, res, next);
     });
 }, createProduct);
-userRouter.post('/:id/update/', authenticateJWT, upload.single("image"), updateProduct);
-userRouter.post('/:id/delete', authenticateJWT, verifyRole("admin"), deleteProduct);
-userRouter.post('/set-product-discount',authenticateJWT, verifyRole("admin"),setProductDiscount);
-userRouter.post(`/set-category/`, authenticateJWT, setProductCategory); // "set Product Category" would be better
-userRouter.post('/remove-discount', authenticateJWT, verifyRole("admin"), removeDiscountFromProduct);
-userRouter.post('/remove-category',authenticateJWT,verifyRole("admin"),removeCategoryFromProduct);
+productRouter.patch('/:id/', authenticateJWT, upload.single("image"), updateProduct);
+productRouter.delete('/:id/', authenticateJWT, verifyRole("admin"), deleteProduct);
 
-export default userRouter;
+productRouter.post('/:productId/discounts/',authenticateJWT, verifyRole("admin"),setProductDiscount);
+productRouter.post(`/:productId/categories/`, authenticateJWT, setProductCategory); // "set Product Category" would be better
+productRouter.delete('/:productId/discounts/:discountId', authenticateJWT, verifyRole("admin"), removeDiscountFromProduct);
+productRouter.delete('/:productId/categories/:categoryId',authenticateJWT,verifyRole("admin"),removeCategoryFromProduct);
+
+export default productRouter;

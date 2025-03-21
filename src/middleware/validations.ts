@@ -12,7 +12,8 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/'); // The directory to store the uploaded file
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+    const ext = file.originalname.split(".")[1];
+    cb(null, `${Date.now()}-${file.originalname.slice(0,8)}.${ext}`); // Unique filename
   },
 });
 
@@ -21,8 +22,6 @@ const upload = multer(
     storage, 
     limits: { fileSize: 1024 * 1024 } ,
     fileFilter(req, file, cb) {
-      console.log("SNEED");
-      console.log(file.mimetype);
       if (!file.mimetype.startsWith('image/')) {
         return cb(new Error('Only image files are allowed!'));
       }

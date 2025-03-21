@@ -1,15 +1,19 @@
 import db from '../db/database';
 import { faker } from '@faker-js/faker';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 interface QueryOptions {
     price_gt?: number;
     price_lt?: number;
     price_eq?: number;
-    name?: string;
-    categories?: number[];
+    subject?: string;
+    categories?: string;
     limit?: number;
     offset?: number;
     order?: "l"|"o"|"pl"|"ph";
+}
+interface ProductCount {
+    totalCount: number
 }
 
 class Product {
@@ -19,22 +23,22 @@ class Product {
         let conditionsParams = [];
 
         if(queryOptions?.price_gt){
-          conditions.push(`price > ?`);
+          conditions.push(`discounted_price > ?`);
           conditionsParams.push(queryOptions.price_gt);
         }
         if(queryOptions?.price_lt){
-            conditions.push(`price < ?`);
+            conditions.push(`discounted_price < ?`);
             conditionsParams.push(queryOptions.price_lt);
         }
         if(queryOptions?.price_eq){
-            conditions.push(`price = ?`);
+            conditions.push(`discounted_price = ?`);
             conditionsParams.push(queryOptions.price_eq);
         }
-        if(queryOptions?.name){
+        if(queryOptions?.subject){
             conditions.push(`LOWER(name) LIKE ?`);
-            conditionsParams.push(`%${queryOptions.name.toLowerCase()}%`);
+            conditionsParams.push(`%${queryOptions.subject.toLowerCase()}%`);
         }
-        if(queryOptions?.categories){
+        if(queryOptions?.categories && queryOptions?.categories !== "0" && !queryOptions?.categories.includes("0")){
             conditions.push(`category_id IN (?)`);
             conditionsParams.push(queryOptions.categories);
         }
@@ -87,7 +91,7 @@ class Product {
             throw Error(`Error linking product to category`);
         }
     }
-    static async setProductDiscount(productId: number, discountId: number){
+    static async setProductDiscount(productId: string, discountId: string){
         const query = `INSERT INTO products_discounts (product_id,discount_id) VALUES (?,?)`;
         try{
             await db.query(query,[productId,discountId]);
@@ -103,9 +107,9 @@ class Product {
         const query = `INSERT INTO products (name, description, price, identifier, image) VALUES (?, ?, ?, ?, ?)`;
         const values = [name,description,price,identifier,image];
         try{
-            const [insert] = await db.query(query, values);
-            const nog = await (insert as any).insertId;
-            await db.query(`INSERT INTO products_categories (product_id, category_id) VALUES (?,?)`,[(insert as any).insertId,category]);
+            const [insert] = await db.query<ResultSetHeader>(query, values);
+            const nog = await insert.insertId;
+            await db.query(`INSERT INTO products_categories (product_id, category_id) VALUES (?,?)`,[insert.insertId,category]);
         }catch(error){
             throw Error(`Error inserting product -> ${name}`);
         }
@@ -165,8 +169,8 @@ class Product {
     }
     static async countProducts(){
         const query = `SELECT COUNT(*) as totalCount FROM products`;
-        const [total] = await db.query(query);
-        return total;
+        const [[total]] = await db.query<RowDataPacket[]>(query);
+        return total.totalCount;
     }
 }
 

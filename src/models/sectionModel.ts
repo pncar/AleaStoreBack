@@ -1,5 +1,5 @@
 import db from '../db/database';
-import { faker } from '@faker-js/faker';
+import { RowDataPacket } from 'mysql2';
 
 class Section {
     static async getSections(){
@@ -15,11 +15,11 @@ class Section {
     static async getSectionById(id:string){
         try{
             const query = `SELECT * FROM sections WHERE id = ?`;
-            const [rows] = await db.query(query,[id]);
-            const rowsWithCategories = Promise.all((rows as any).map(async(row:any)=>{
+            const [rows] = await db.query<SectionType[] & RowDataPacket[]>(query,[id]);
+            const rowsWithCategories = Promise.all(rows.map(async(row:SectionType)=>{
                 const query = `SELECT category_id as id FROM sections_categories WHERE section_id = ?`;
-                const [categories] = await db.query(query,[id]);
-                return {...(row as any),categories: (categories as any).map((category:any) => category.id)};
+                const [categories] = await db.query<CategoryType[] & RowDataPacket[]>(query,[id]);
+                return {...row,categories: categories.map((category:CategoryType) => category.id)};
             }))
             return rowsWithCategories;
         }catch(error){
@@ -28,7 +28,6 @@ class Section {
         }
     }
     static async getSectionCategories(id: string){
-        //const query = `SELECT * FROM sections_categories WHERE section_id = ?`;
         const query = `SELECT categories.* FROM categories JOIN sections_categories ON categories.id = sections_categories.category_id WHERE sections_categories.section_id = ?`;
         try{
             const [rows] = await db.query(query,[id]);
