@@ -1,4 +1,5 @@
 import db from '../db/database';
+import { RowDataPacket } from 'mysql2';
 
 class Discount {
     static async getDiscounts(){
@@ -8,7 +9,7 @@ class Discount {
     }
     static async getDiscountById(id:string){
         const query = `SELECT * FROM discounts WHERE id = ?`;
-        const [rows] = await db.query(query,[id]);
+        const [rows] = await db.query<DiscountType[] & RowDataPacket[]>(query,[id]);
         return rows;
     }
     static async getDiscountsByProduct(productId:string){

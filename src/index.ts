@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from 'path';
 import dotenv from "dotenv";
+import storeInfoRouter from "./routes/storeRoutes";
 import userRouter from './routes/userRoutes';
 import productRouter from './routes/productRoutes';
 import categoryRouter from './routes/categoryRoutes';
@@ -65,6 +66,7 @@ app.get("/api/", (req: Request, res: Response) => {
 
 app.use("/api/auth", authRouter);
 
+app.use('/api/store', storeInfoRouter);
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/categories', categoryRouter);

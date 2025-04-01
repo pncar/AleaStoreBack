@@ -80,7 +80,7 @@ class Product {
     }
     static async getProductById(id:string){
         const query = `SELECT * FROM ProductView WHERE id = ?`;
-        const [rows] = await db.query(query, [id]);
+        const [rows] = await db.query<ProductType[] & RowDataPacket[]>(query, [id]);
         return rows;
     }
     static async setProductCategory(productId: string,categoryId: string){

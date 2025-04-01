@@ -47,7 +47,10 @@ export const getChildrenCategories = async (req: Request, res: Response) => {
 export const getCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   try{
-    const category = await Category.getCategoryById(id);
+    const [category] = await Category.getCategoryById(id);
+    if(!category){
+      res.status(404).json({message: `Category of id ${id} not found.`})
+    }
     res.status(200).json(category);
   }
   catch (error){

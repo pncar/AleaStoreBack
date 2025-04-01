@@ -14,7 +14,10 @@ import User from "../models/userModel";
     export const getUserById = async (req: Request, res: Response) => {
         const { id } = req.params;
         try {
-            const user = await User.getUserById(id);
+            const [user] = await User.getUserById(id);
+            if (!user) {
+                res.status(404).json({ message: `User of id ${id} not found.` });
+            }
             res.status(200).json(user);
         } catch (error) {
             console.error(error);

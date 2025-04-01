@@ -9,7 +9,7 @@ class Category {
     }
     static async getCategoryById(id:string){
         const query = `SELECT * FROM categories WHERE id = ?`;
-        const [rows] = await db.query(query,id);
+        const [rows] = await db.query<CategoryType[] & RowDataPacket[]>(query,id);
         return rows;
     }
     static async getCategoriesByTier(tier:string){

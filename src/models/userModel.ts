@@ -45,16 +45,26 @@ class User {
             throw Error(`Error creating user`);
         }
     }
-    static async updateUser(id: string, name: string, email: string, phone: string, role: string){
+    static async updateUser(id: string, name?: string, email?: string, phone?: string, role?: string){
         const fields: string[] = [];
         const values: string[] = [];
         const data = { name, email, phone, role };
-        Object.entries(data).map((item:[string,string])=>{
-            if(item){
-                fields.push(`${item[0]} = ?`);
-                values.push(item[1]);
-            }
-        });
+        if(name){
+            fields.push(`name = ?`);
+            values.push(name);
+        }
+        if(email){
+            fields.push(`email = ?`);
+            values.push(email);
+        }
+        if(phone){
+            fields.push(`phone = ?`);
+            values.push(phone);
+        }
+        if(role){
+            fields.push(`role = ?`);
+            values.push(role);
+        }
         const t_fields = fields.join(", ");
         const query = `UPDATE users SET ${t_fields} WHERE id = ?`;
         try{

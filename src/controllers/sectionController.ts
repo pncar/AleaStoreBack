@@ -14,7 +14,10 @@ export const getSections = async (req: Request, res: Response) => {
 export const getSectionById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try{
-        const section = await Section.getSectionById(id);
+        const [section] = await Section.getSectionById(id);
+        if (!section) {
+            res.status(404).json({ message: `Section of id ${id} not found.` });
+        }
         res.status(200).send(section);
     }catch(error){
         console.error(error);

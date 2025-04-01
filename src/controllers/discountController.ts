@@ -13,7 +13,10 @@ export const getDiscounts = async (req: Request, res: Response) => {
 export const getDiscountById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const discount = await Discount.getDiscountById(id);
+        const [discount] = await Discount.getDiscountById(id);
+        if(!discount){
+            res.status(404).json({message: `Discount of id ${id} not found.`})
+        }
         res.status(200).json(discount)
     }catch (error){
         console.error(error);

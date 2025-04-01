@@ -15,6 +15,14 @@ const productsLength = 50;
 
 exports.seed = async function(knex) {
 
+// Seed Store Settings
+
+const storeName = `${_.capitalize(faker.word.adjective())} ${_.capitalize(faker.word.noun())} Store`;
+const storeSubtitle = faker.lorem.sentence();
+const storeSlug = storeName.toLowerCase().replace(/\s+/g, "_");
+
+await knex.raw('INSERT INTO settings (store_name,store_subtitle,store_slug) VALUES (?,?,?)',[storeName,storeSubtitle,storeSlug]);
+
 // Seed Users
 
   // Deletes ALL existing entries

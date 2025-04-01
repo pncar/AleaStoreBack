@@ -17,8 +17,11 @@ class Order {
         const query = `SELECT * FROM OrdersView WHERE id = ?`;
         let [rows] = await db.query<OrderType[] & RowDataPacket[]>(query, [id]);
         const itemsQuery = `SELECT * FROM OrderItemsView WHERE order_id = ?`;
-        const [items] = await db.query<ResultSetHeader>(itemsQuery,[id]);
-        return {...rows[0],items};
+        if(rows && rows.length > 0){
+            const [items] = await db.query<ResultSetHeader>(itemsQuery,[id]);
+            return {...rows[0],items};
+        }
+        return rows[0];
     }
     static async getOrdersByUser(id: string, role: string = "user"){
         const query = `SELECT * FROM OrdersView WHERE user_id = ? ${role === "user" ? ` AND status <> 'paid' AND status <> 'cancelled' ` : ``}`;
