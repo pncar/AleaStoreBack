@@ -9,14 +9,20 @@ const SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction): any => {
   const token = req.cookies.authToken;
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-
+  if (!token) {
+    console.log(`Unauthorized`,jwtDecode(token));
+    return res.status(401).json({ message: "Unauthorized" });
+  }
   // LOG USER TOKEN console.log(jwtDecode(token));
 
   //@ts-ignore
   jwt.verify(token, SECRET, (err, decoded) => {
-    if (err || !decoded) return res.status(403).json({ message: "Invalid token" });
+    if(err || !decoded){ 
+      console.error(`Invalid token`);
+      return res.status(403).json({ message: "Invalid token" }) 
+    };
     req.user = decoded;
+    console.log(`JWT working as expected`);
     next();
   });
 };
