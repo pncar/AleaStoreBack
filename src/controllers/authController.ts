@@ -30,6 +30,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     //console.log(`LOGGED IN USER ${id}, ${email}, ${password}`);
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET, { expiresIn: "1h" });
+    console.log("TOKEN: ");
+    console.log(token);
     res.cookie("authToken", token, { httpOnly: true, secure: true }).json({ message: "Logged in" });
 };
 
