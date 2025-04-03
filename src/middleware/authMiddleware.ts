@@ -8,7 +8,10 @@ const SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction): any => {
+  console.log(req);
   const token = req.cookies.authToken;
+  console.log(`TOKEN:`);
+  console.log(token);
   if (!token) {
     console.log(`Unauthorized`,jwtDecode(token));
     return res.status(401).json({ message: "Unauthorized" });
