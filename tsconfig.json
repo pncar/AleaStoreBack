@@ -114,5 +114,5 @@
 	}
     // …
   },
-  "include": ["*","src","../shared"]
+  "include": ["*","src","node_modules/@pncar/as-shared-types"] /* formerly ../shared */
 }

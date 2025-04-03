@@ -81,7 +81,7 @@ app.use((req: Request, res: Response) => {
 app.use(errorHandler); // After Routes, Before Listen
 
 
-app.listen(PORT, () => { 
+app.listen(Number(PORT), "0.0.0.0", () => { 
   console.log("Server running at PORT: ", PORT || 3000); 
 }).on("error", (error) => {
   throw new Error(error.message);
