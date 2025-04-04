@@ -34,6 +34,9 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     console.log(token);
     //res.cookie("authToken", token, { httpOnly: true, secure: true }).json({ message: "Logged in" });
     res.cookie("authToken", token, { httpOnly: false, secure: false, sameSite: "lax"}).json({message: `Logged in`});
+    console.log("SNEEEEEEED");
+    console.log("Set-Cookie Header:", res.getHeaders()["set-cookie"]); // Debugging
+    console.log("SNEEEEEEED");
 };
 
 export const logout = (req: Request, res: Response): void => {
