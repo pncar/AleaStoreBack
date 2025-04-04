@@ -55,7 +55,7 @@ app.use("/uploads", express.static(path.resolve(__dirname, "..", "uploads")));
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"]
+  //allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
